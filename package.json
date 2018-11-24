@@ -1,0 +1,31 @@
+{
+  "name": "gittyup",
+  "version": "1.0.0",
+  "description": "Friendlier git",
+  "main": "gittyUp.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node gittyUp.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jorgemanzo/gitty.git"
+  },
+  "keywords": [
+    "gittyUp"
+  ],
+  "author": "jorgemanzo",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jorgemanzo/gitty/issues"
+  },
+  "homepage": "https://github.com/jorgemanzo/gitty#readme",
+  "dependencies": {
+    "enquirer": "^2.0.7",
+    "purpzielog": "^2.0.3",
+    "simple-git": "^1.107.0"
+  },
+  "devDependencies": {
+    "standard": "^12.0.1"
+  }
+}
