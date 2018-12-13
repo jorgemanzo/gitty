@@ -35,6 +35,17 @@ const unstage = async (dir, files) => {
 	return unstagedSummary
 }
 
+const remove = async (dir, files) => {
+	let removedSummary = null
+	try {
+		removedSummary = await git(dir).rmKeepLocal(files)
+	} catch (e) {
+		console.log('error removing: ' + e)
+		return -1
+	}
+	return removedSummary
+}
+
 const logUntracked = (status) => {
 	if(status.not_added.length < 1) {
 		new Logger().warn('No untracked files')
@@ -58,14 +69,14 @@ const logModified = (status) => {
 }
 
 const logToBeCommited = (status) => {
-	if(status.created.length < 1) {
+	if(status.created.length + status.staged.length < 1) {
 		new Logger().warn('No files to be commited')
 		return -1
 	}
   const log = new Logger({
     tracked: { label: 'Files to be commited', color: 'green' }
   })
-  log.tracked(...status.created)
+  log.tracked(...status.created.concat(status.staged))
 }
 
 const askAction = async () => {
@@ -78,7 +89,8 @@ const askAction = async () => {
     name: 'action',
     message: 'GittyUp!',
     choices: [
-			'Add',
+			'Stage',
+			'Unstage',
       'Status',
       'Track',
       'Untrack',
@@ -143,9 +155,37 @@ const gitUntack = async () => {
 	return 0
 }
 
+const gitStage = async () => {
+	let status = await gitStatus()
+	let choices = await selectFiles(status.modified)
+	if(choices === -1)
+		return -1
+	
+	let addedSummary = await add('.', choices.selectFiles)
+	if(choices === -1)
+		return -1
+	
+	let newStatus = await gitStatus()
+	printStatus(newStatus)
+	return 0
+}
+
+const gitUnstage = async () => {
+	let status = await gitStatus()
+	let choices = await selectFiles(status.staged)
+	if(choices === -1)
+		return -1
+
+	let removedSummary = await unstage('.', choices.selectFiles)
+	if(removedSummary === -1)
+		return -1
+	
+	let newStatus = await gitStatus()
+	printStatus(newStatus)
+	return 0
+}
+
 /*TODO: 
-	- Implement Add for staging changed but tracked files.
-	- Implement remove for unstaging changed but tracked files.
 	- Implement commit
 	- Implement push
 */
@@ -157,11 +197,13 @@ const main = async () => {
 			let status = await gitStatus()
 			printStatus(status)
 		} else if (response.action === 'Track') {
-			let exitStatus = await gitTrack()
+			await gitTrack()
 		} else if (response.action === 'Untrack') {
-			let exitStatus = await gitUntack()
-		} else if (response.action === 'Add') {
-
+			await gitUntack()
+		} else if (response.action === 'Stage') {
+			await gitStage()
+		} else if (response.action === 'Unstage') {
+			await gitUnstage()
 		} else if (response.action === 'Exit') {
 			process.exit(0)
 		}
