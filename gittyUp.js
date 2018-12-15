@@ -7,7 +7,7 @@ const stat = async (dir) => {
   try {
     statusSummary = await git(dir).status()
   } catch (e) {
-    console.log('error stating: ' + e)
+    oops('error stating: ' + e)
   }
   return statusSummary
 }
@@ -17,7 +17,7 @@ const add = async (dir, files) => {
   try {
     addSummary = await git(dir).add(files)
   } catch (e) {
-		console.log('error adding: ' + e)
+		oops('error adding: ' + e)
 		return -1
   }
 
@@ -29,7 +29,7 @@ const commit = async (dir, message) => {
 	try {
 		commitSummary = await git(dir).commit(message)
 	} catch (e) {
-		console.log('error commiting: ' + e)
+		oops('error commiting: ' + e)
 		return -1
 	}
 	return commitSummary
@@ -40,7 +40,7 @@ const simplePush = async (dir, remote, branch) => {
 	try { 
 		pushSummary = await git(dir).push(remote, branch)
 	} catch (e) {
-		console.log('error pushing: ' + e)
+		oops('error pushing: ' + e)
 		return -1
 	}
 	return pushSummary
@@ -51,7 +51,7 @@ const unstage = async (dir, files) => {
 	try {
 		unstagedSummary = await git(dir).reset(['HEAD'].concat(files))
 	} catch (e) {
-		console.log('error adding: ' + e)
+		oops('error adding: ' + e)
 		return -1
 	}
 	return unstagedSummary
@@ -62,10 +62,14 @@ const remove = async (dir, files) => {
 	try {
 		removedSummary = await git(dir).rmKeepLocal(files)
 	} catch (e) {
-		console.log('error removing: ' + e)
+		oops('Error removing: ' + e)
 		return -1
 	}
 	return removedSummary
+}
+
+const oops = errorMessage => {
+	new Logger().error(errorMessage)
 }
 
 const logUntracked = (status) => {
@@ -118,6 +122,7 @@ const askAction = async () => {
 			'Untrack',
 			'Commit',
 			'Simple-Push',
+			'Simple-Pull',
       'Exit'
     ]
   })
@@ -132,7 +137,7 @@ const printStatus = (status) => {
 
 const selectFiles = async (filesLIst) => {
   if (filesLIst.length < 1) {
-		new Logger().error('No files')
+		oops('No files provided!')
     return -1
   }
   const response = await prompt({
@@ -211,7 +216,10 @@ const gitUnstage = async () => {
 
 const gitCommit = async () => {
 	const dirstat = await gitStatus()
-	if(dirstat.created.length + dirstat.staged.length < 1) return -1
+	if(dirstat.created.length + dirstat.staged.length < 1) {
+		oops('No files to commit!')
+		return -1
+	}
 
 	const response = await prompt({
 		type: 'input', 
@@ -235,8 +243,15 @@ const simpleGitPush = async () => {
 	new Logger().info('Push complete!')	
 }
 
+const simpleGitPull = async () => {
+	let pullResults = gitPull()
+	if(pullResults === -1) return -1
+	return pullResults
+}
+
 /*TODO: 
 	- Test for bugs!
+	- Implement simple pull
 */
 
 const main = async () => {
@@ -257,6 +272,8 @@ const main = async () => {
 			await gitCommit()
 		} else if (response.action === 'Simple-Push') {
 			await simpleGitPush()
+		} else if (response.action === 'Simple-Pull') {
+			await simpleGitPull()
 		} else if (response.action === 'Exit') {
 			process.exit(0)
 		}
