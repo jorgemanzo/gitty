@@ -24,6 +24,28 @@ const add = async (dir, files) => {
   return addSummary
 }
 
+const commit = async (dir, message) => {
+	let commitSummary = null
+	try {
+		commitSummary = await git(dir).commit(message)
+	} catch (e) {
+		console.log('error commiting: ' + e)
+		return -1
+	}
+	return commitSummary
+}
+
+const simplePush = async (dir, remote, branch) => {
+	let pushSummary = null
+	try { 
+		pushSummary = await git(dir).push(remote, branch)
+	} catch (e) {
+		console.log('error pushing: ' + e)
+		return -1
+	}
+	return pushSummary
+}
+
 const unstage = async (dir, files) => {
 	let unstagedSummary = null
 	try {
@@ -95,6 +117,7 @@ const askAction = async () => {
       'Track',
 			'Untrack',
 			'Commit',
+			'Simple-Push',
       'Exit'
     ]
   })
@@ -195,12 +218,25 @@ const gitCommit = async () => {
 		name: 'commitMessage', 
 		message: 'Please provide a commit message:' 
 	})
-	console.log(response)
+	
+	let commitResults = commit('.', response.commitMessage)
+	if(commitResults === -1) return -1
+
+	new Logger().info('Commit complete!')
+}
+
+const simpleGitPush = async () => {
+	new Logger().warn('Pushing to remote origin on master branch!')
+	const dirstat = await gitStatus()
+
+	const pushResp = await simplePush('.', 'origin', dirstat.current)
+	if(pushResp === -1) return -1
+
+	new Logger().info('Push complete!')	
 }
 
 /*TODO: 
-	- Implement commit
-	- Implement push
+	- Test for bugs!
 */
 
 const main = async () => {
@@ -218,8 +254,9 @@ const main = async () => {
 		} else if (response.action === 'Unstage') {
 			await gitUnstage()
 		} else if (response.action === 'Commit') {
-			console.log("AAAAA")
 			await gitCommit()
+		} else if (response.action === 'Simple-Push') {
+			await simpleGitPush()
 		} else if (response.action === 'Exit') {
 			process.exit(0)
 		}
