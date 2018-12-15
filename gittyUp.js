@@ -46,6 +46,10 @@ const simplePush = async (dir, remote, branch) => {
 	return pushSummary
 }
 
+const gitPull = async (dir) => {
+	await git(dir).pull()
+}
+
 const unstage = async (dir, files) => {
 	let unstagedSummary = null
 	try {
@@ -72,9 +76,13 @@ const oops = errorMessage => {
 	new Logger().error(errorMessage)
 }
 
+const warn = warnMessage => {
+	new Logger().warn(warnMessage)
+}
+
 const logUntracked = (status) => {
 	if(status.not_added.length < 1) {
-		new Logger().warn('No untracked files')
+		warn('No untracked files')
 		return -1
 	}
   const log = new Logger({
@@ -85,7 +93,7 @@ const logUntracked = (status) => {
 
 const logModified = (status) => {
 	if(status.modified.length < 1) {
-		new Logger().warn('No newly modified files')
+		warn('No newly modified files')
 		return -1
 	}
   const log = new Logger({
@@ -96,7 +104,7 @@ const logModified = (status) => {
 
 const logToBeCommited = (status) => {
 	if(status.created.length + status.staged.length < 1) {
-		new Logger().warn('No files to be commited')
+		warn('No files to be commited')
 		return -1
 	}
   const log = new Logger({
@@ -234,7 +242,7 @@ const gitCommit = async () => {
 }
 
 const simpleGitPush = async () => {
-	new Logger().warn('Pushing to remote origin on master branch!')
+	warn('Pushing to remote origin on master branch!')
 	const dirstat = await gitStatus()
 
 	const pushResp = await simplePush('.', 'origin', dirstat.current)
@@ -244,7 +252,8 @@ const simpleGitPush = async () => {
 }
 
 const simpleGitPull = async () => {
-	let pullResults = gitPull()
+	warn('Fetching from origin on master branch!')
+	let pullResults = gitPull('.')
 	if(pullResults === -1) return -1
 	return pullResults
 }
