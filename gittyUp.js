@@ -93,7 +93,8 @@ const askAction = async () => {
 			'Unstage',
       'Status',
       'Track',
-      'Untrack',
+			'Untrack',
+			'Commit',
       'Exit'
     ]
   })
@@ -185,6 +186,18 @@ const gitUnstage = async () => {
 	return 0
 }
 
+const gitCommit = async () => {
+	const dirstat = await gitStatus()
+	if(dirstat.created.length + dirstat.staged.length < 1) return -1
+
+	const response = await prompt({
+		type: 'input', 
+		name: 'commitMessage', 
+		message: 'Please provide a commit message:' 
+	})
+	console.log(response)
+}
+
 /*TODO: 
 	- Implement commit
 	- Implement push
@@ -204,6 +217,9 @@ const main = async () => {
 			await gitStage()
 		} else if (response.action === 'Unstage') {
 			await gitUnstage()
+		} else if (response.action === 'Commit') {
+			console.log("AAAAA")
+			await gitCommit()
 		} else if (response.action === 'Exit') {
 			process.exit(0)
 		}
