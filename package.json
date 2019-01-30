@@ -1,18 +1,18 @@
 {
-  "name": "gittyup",
+  "name": "gitty-up",
   "version": "1.0.0",
   "description": "Friendlier git",
-  "main": "gittyUp.js",
+  "main": "gitty-up.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node gittyUp.js"
+    "start": "node gitt-upp.js"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/jorgemanzo/gitty.git"
   },
   "keywords": [
-    "gittyUp"
+    "gitty-up"
   ],
   "author": "jorgemanzo",
   "license": "MIT",
@@ -26,6 +26,6 @@
     "simple-git": "^1.107.0"
   },
   "devDependencies": {
-    "standard": "^12.0.1"
+    "xo": "^0.24.0"
   }
 }
